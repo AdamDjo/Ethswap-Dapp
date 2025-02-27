@@ -79,3 +79,15 @@ ethswap-vite/
 ├── README.md
 └── vite.config.js
 ```
+
+## Technologies Used
+
+React
+
+Vite
+
+Tailwind CSS
+
+Ethers.js
+
+MetaMask
