@@ -1,4 +1,15 @@
-export default function TxList({ txs }) {
+interface Tx {
+  txHash: string;
+  from: string;
+  to: string;
+  amount: string;
+}
+
+interface TxListProps {
+  txs: Tx[];
+}
+
+export default function TxList({ txs }: TxListProps) {
   if (txs.length === 0) return null;
   return (
     <>

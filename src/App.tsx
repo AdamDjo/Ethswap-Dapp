@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import erc20abi from './contracts/erc20abi.json';
+import erc20abi from './contracts/ERC20abi.json';
 import TxList from './TxList';
 
 declare global {
