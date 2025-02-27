@@ -3,10 +3,24 @@ import { ethers } from 'ethers';
 import erc20abi from './contracts/erc20abi.json';
 import TxList from './TxList';
 
+declare global {
+  interface Window {
+    ethereum: any;
+  }
+}
+
+interface Tx {
+  txHash: string;
+  from: string;
+  to: string;
+  amount: string;
+}
+
 export default function App() {
-  const [txs, setTxs] = useState([]);
-  const [contractListened, setContractListened] = useState();
-  const [error, setError] = useState();
+  const [txs, setTxs] = useState<Tx[]>([]);
+  const [contractListened, setContractListened] = useState<
+    ethers.Contract | undefined
+  >(undefined);
   const [contractInfo, setContractInfo] = useState({
     address: '-',
     tokenName: '-',
@@ -43,24 +57,30 @@ export default function App() {
       setContractListened(erc20);
 
       return () => {
-        contractListened.removeAllListeners();
+        if (contractListened) {
+          contractListened.removeAllListeners();
+        }
       };
     }
   }, [contractInfo.address]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = new FormData(e.target);
+    const data = new FormData(e.target as HTMLFormElement);
     const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-    const erc20 = new ethers.Contract(data.get('addr'), erc20abi, provider);
+    const erc20 = new ethers.Contract(
+      data.get('addr') as string,
+      erc20abi,
+      provider
+    );
 
     const tokenName = await erc20.name();
     const tokenSymbol = await erc20.symbol();
     const totalSupply = await erc20.totalSupply();
 
     setContractInfo({
-      address: data.get('addr'),
+      address: data.get('addr') as string,
       tokenName,
       tokenSymbol,
       totalSupply
@@ -81,22 +101,21 @@ export default function App() {
     });
   };
 
-  const handleTransfer = async (e) => {
+  const handleTransfer = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const data = new FormData(e.target);
+      const data = new FormData(e.target as HTMLFormElement);
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.send('eth_requestAccounts', []);
       const signer = await provider.getSigner();
       const erc20 = new ethers.Contract(contractInfo.address, erc20abi, signer);
       const tx = await erc20.transfer(
-        data.get('recipient'),
-        data.get('amount')
+        data.get('recipient') as string,
+        data.get('amount') as string
       );
       await tx.wait();
-      setError(null);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
     }
   };
 
